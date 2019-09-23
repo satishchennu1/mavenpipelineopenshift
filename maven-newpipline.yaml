@@ -97,13 +97,13 @@ objects:
                     unstash name:"war"
                     def status = sh(returnStdout: true, script: "oc start-build ${appName}-docker --from-file=target/ROOT.war -n ${project}")
                     def result = status.split("\n").find{ it.matches("^build.*started") }
-
+                    
                     if(!result) {
                       echo "ERROR: No started build found for ${appName}"
                       currentBuild.result = 'FAILURE'
                       return
                     }
-
+                    
                     // result can be:
                     // - build "build-name" started
                     // - build build.build.openshift.io/build-name started
@@ -111,7 +111,7 @@ objects:
                     // Goal is to isolate "build-name"
                     def startedBuild = result.replaceAll("build [^0-9a-zA-Z]*", "").replaceAll("[^0-9a-zA-Z]* started", "").replaceFirst("^.*/", "")
                     echo "Build ${startedBuild} has started. Now watching it ..."
-
+                    
                     timeout(time: 20, unit: 'MINUTES') {
                       openshift.withCluster() {
                         openshift.withProject() {
@@ -124,11 +124,8 @@ objects:
                             return object.status.phase == "Complete"
                           }
                         }
-                      }
+                      }  
                     }
-                  }
-                  stage("Push Image to Registry ") {
-                  echo "Pushing the image to the registry"
                   }
                   stage("Deploy POD") {
                     openshift.withCluster() {
@@ -190,7 +187,7 @@ objects:
       app: ${APP_NAME}
     name: ${APP_NAME}
   spec:
-    replicas: 3 
+    replicas: 1
     selector:
       app: ${APP_NAME}
       deploymentconfig: ${APP_NAME}
@@ -288,4 +285,3 @@ objects:
     port:
       targetPort: 8080-tcp
     wildcardPolicy: None
-
