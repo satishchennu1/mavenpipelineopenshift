@@ -92,11 +92,12 @@ objects:
                     stash name:"war", includes:"target/ROOT.war"
                   }
                   stage('SonarQube Analysis') {
-        	    def mvnHome =  tool name: 'maven', type: 'maven'
-                    withSonarQubeEnv('sonarcube') { 
-                    sh "${mvnHome}/bin/mvn sonar:sonar"
+                  def mvnHome =  tool name: 'maven', type: 'maven'
+                  withSonarQubeEnv('SonarQube') { 
+                  sh "${mvnHome}/bin/mvn sonar:sonar -Dsonar.host.url=http://sonarqube-sonarqubeanalysis.apps.ocppilot.ocpcontainer.com/ -DskipTests=true"
                   }
                 }
+              }
                 node {
                   stage("Build POD") {
                     unstash name:"war"
